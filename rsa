@@ -1,0 +1,46 @@
+#!/usr/bin/python3
+"""Factorize numbers from a file into two prime factors"""
+
+import sys
+import logging
+
+logging.basicConfig(level=logging.DEBUG)
+
+def prime_factorize(number):
+    """Factorize a number into two prime factors"""
+    i = 2
+    factors = []
+    while i * i <= number:
+        if number % i:
+            i += 1
+        else:
+            number //= i 
+            factors.append(i)
+    if number > 1:    
+        factors.append(number)
+        
+    factor_str = "*".join(map(str, factors))
+    print(f"{number}={factor_str}")
+    
+
+if len(sys.argv) != 2:
+    logging.error("Usage: factorize.py <filename>")
+    sys.exit(1)    
+    
+try:      
+    f_name = sys.argv[1]
+    with open(f_name) as f:
+        data = f.read().splitlines()   
+        nums = [int(n) for n in data]
+except Exception:
+    logging.exception("Error opening file")  
+    sys.exit(1)          
+
+for num in nums:
+    prime_factorize(num)
+
+with open("factors.txt", "w") as f:
+    for num in nums:
+        prime_factorize(num, file=f)
+
+logging.info("Finished factorizing numbers")
