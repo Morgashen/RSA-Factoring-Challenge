@@ -1,48 +1,38 @@
 #!/usr/bin/python3
-import sys
-import json
 
-def factorize(number_to_check):
-    """Find two factors of a number"""
-    factors = []
-    for i in range(2, int(number_to_check**0.5)+1):
-        if number_to_check % i == 0:
-            factors.append(i)
-            factors.append(number_to_check//i)
-            return factors
-    return "Prime number"
-            
+import sys
+import math
+from timeit import default_timer as timer
+
+def factorize(n):
+    if n < 2:
+        return
+
+    # Optimized trial division
+    limit = int(math.sqrt(n)) + 1
+    for i in range(2, limit):
+        if n % i == 0:
+            return n//i, i
+    return n, 1 # prime
+
 if __name__ == '__main__':
 
-    # Validate command line arguments
-    if len(sys.argv) != 2:
-        print("Usage: factorize.py <file>")
-        sys.exit(1)
+    start = timer()
+    limit = start + 5 # 5 second limit
 
     try:
-        file_path = sys.argv[1]
-        
-        # Open file and validate 
-        with open(file_path) as f:
-            if not f.readable():
-                raise IOError("File not readable")
+        filename = sys.argv[1]
+        with open(filename) as f:
+            lines = (line.strip() for line in f)
+            nums = map(int, lines)
 
-            # Read numbers from file
-            numbers = [int(line.strip()) for line in f]
+            for n in nums:
+                if timer() >= limit:
+                    print('Time limit reached')
+                    break
 
-    except IOError as e:
-        print(e)
-        sys.exit(1) 
-    except ValueError:
-        print("Invalid number in file")
-        sys.exit(1)
+                result = factorize(n)
+                print(f'{n}={result[0]}*{result[1]}')
 
-    # Output factorizations
-    output = []
-    for num in numbers:
-        factors = factorize(num)
-        if type(factors) == list: 
-            factors = "*".join([str(x) for x in factors])
-        output.append({num: factors})
-
-    print(json.dumps(output, indent=4))
+    except IndexError:
+        print('Usage: factors <file>')
